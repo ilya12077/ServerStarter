@@ -1,0 +1,30 @@
+{
+  "647372660": {
+    "first_name": "\u0418\u043b\u044c\u044f",
+    "waiting": {
+      "is_waiting": false
+    },
+    "is_admin": true
+  },
+  "761463165": {
+    "first_name": "zorenko",
+    "waiting": {
+      "is_waiting": false
+    },
+    "is_admin": false
+  },
+  "653163965": {
+    "first_name": "\u0420\u043e\u043c\u0430",
+    "waiting": {
+      "is_waiting": false
+    },
+    "is_admin": false
+  },
+  "723293637": {
+    "first_name": "\u0422\u0435\u0439\u043f",
+    "waiting": {
+      "is_waiting": false
+    },
+    "is_admin": false
+  }
+}

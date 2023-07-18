@@ -1,0 +1,10 @@
+services:
+  nginx:
+    build: /share/Server-docker/nginx
+    restart: always
+    ports:
+      - 1818:80
+  telegrambot:
+    restart: always
+    build: /share/Server-docker/telegrambot
+
