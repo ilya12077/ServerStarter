@@ -6,6 +6,7 @@ from threading import Thread
 import requests
 from flask import Flask, request
 from mcrcon import MCRcon
+from waitress import serve
 
 app = Flask(__name__)
 url = 'https://api.telegram.org/bot5570097300:AAHATJopuiSHBk8oN_uG3ty_95m2D5Q3Nzw/'
@@ -85,5 +86,5 @@ def main():
 
 if __name__ == '__main__':
     is_busy = False
-    # serve(app, host='192.168.1.10', port=1813, url_scheme='http')
-    app.run(host='192.168.1.10', port=1813)
+    serve(app, host='192.168.1.10', port=1813, url_scheme='http')
+    # app.run(host='192.168.1.10', port=1813)
