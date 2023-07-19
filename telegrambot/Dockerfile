@@ -21,7 +21,7 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
 RUN git clone git@github.com:ilya12077/ServerStarter-Bot.git
 	
 	
-RUN cp -r ./ServerStarter-Bot/telegrambot/src /etc/telegrambot
+RUN cp -a ./ServerStarter-Bot/telegrambot/src/. /etc/telegrambot/
 RUN rm -r -f ./ServerStarter-Bot/
 
 RUN pip install requests waitress flask
