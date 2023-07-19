@@ -27,6 +27,6 @@ RUN rm -r -f ./ServerStarter-Bot/
 RUN pip install requests waitress flask
 
 ENV AM_I_IN_A_DOCKER_CONTAINER Yes
-
+EXPOSE 8881/tcp
 CMD ["python", "/etc/telegrambot/main.py"]
 
