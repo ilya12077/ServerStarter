@@ -221,7 +221,7 @@ def main_handler(r):
 
     match msg:
         case '/start':
-            send_message(user_id, 'О, узнал тебя, чего желаешь?', keyboards(user_id))
+            send_message(user_id, 'Чего желаешь?', keyboards(user_id))
 
         case '/info':
             if check_port(25565):
