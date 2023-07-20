@@ -228,7 +228,11 @@ def main_handler(r):
 
         case '/info':
             if check_port(25565):
-                send_message(user_id, 'Сервер запущен', keyboards(user_id))  #колво игроков
+                with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
+                    player = mcr.command("/list")
+                    list_players = player[player.index(':') + 1:]
+                    players = int(player[9:11])
+                send_message(user_id, f'Сервер запущен. Игроков: {players}\n<i>{list_players}</i>', keyboards(user_id))
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
             if not check_port(1813):
@@ -267,7 +271,7 @@ def main_handler(r):
                                 data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
                                         'one_time_keyboard': True,
                                         'resize_keyboard': True}
-                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>. Выключить?', data)
+                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
                                 ids[user_id]['waiting']['is_waiting'] = True
                                 ids[user_id]['waiting']['params'] = {'reason': 'close server'}
                                 with open(f'{path}names.json', 'w') as f:
