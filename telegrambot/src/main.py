@@ -128,13 +128,16 @@ def waiting_user_handler(r):
                 if not check_port(25565):
                     send_message(user_id, 'Сервер не запущен', keyboards(user_id))
                 else:
-                    status_code = close_server(user_id, timeout=60)
-                    if status_code == 200:
-                        send_message(user_id, 'Сервер закроется через 60 секунд', keyboards(user_id))
-                    elif status_code == 201:
-                        send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
+                    if not check_port(1813):
+                        send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
                     else:
-                        send_message(user_id, f'Что-то не сработало, напиши в лс ({status_code})', keyboards(user_id))
+                        status_code = close_server(user_id, timeout=60)
+                        if status_code == 200:
+                            send_message(user_id, 'Сервер закроется через 60 секунд', keyboards(user_id))
+                        elif status_code == 201:
+                            send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
+                        else:
+                            send_message(user_id, f'Что-то не сработало, напиши в лс ({status_code})', keyboards(user_id))
             else:
                 send_message(user_id, f'Не выключаю', keyboards(user_id))
             ids[user_id]['waiting']['is_waiting'] = False
@@ -225,54 +228,62 @@ def main_handler(r):
 
         case '/info':
             if check_port(25565):
-                send_message(user_id, 'Сервер запущен', keyboards(user_id))
+                send_message(user_id, 'Сервер запущен', keyboards(user_id))  #колво игроков
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
+            if not check_port(1813):
+                send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
 
         case '/launch':
             if check_port(25565):
                 send_message(user_id, 'Сервер уже запущен', keyboards(user_id))
             else:
-                was_it_launched = launch_server(user_id)
-                if was_it_launched is True:
-                    send_message(user_id, 'Запускаю', keyboards(user_id))
-                elif was_it_launched is False:
-                    send_message(user_id, 'Комп выключен, напиши в лс', keyboards(user_id))
-                elif was_it_launched == 'busy':
-                    send_message(user_id, 'Серв уже запускается', keyboards(user_id))
+                if not check_port(1813):
+                    send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
                 else:
-                    send_message(user_id, f'Что-то не сработало, напиши в лс ({was_it_launched})', keyboards(user_id))
+                    was_it_launched = launch_server(user_id)
+                    if was_it_launched is True:
+                        send_message(user_id, 'Запускаю', keyboards(user_id))
+                    elif was_it_launched is False:
+                        send_message(user_id, 'Комп выключен, напиши в лс', keyboards(user_id))
+                    elif was_it_launched == 'busy':
+                        send_message(user_id, 'Серв уже запускается', keyboards(user_id))
+                    else:
+                        send_message(user_id, f'Что-то не сработало, напиши в лс ({was_it_launched})', keyboards(user_id))
 
         case '/close':
             if not check_port(25565):
                 send_message(user_id, 'Сервер не запущен', keyboards(user_id))
             else:
-                with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
-                    player = mcr.command("/list")
-                    list_players = player[player.index(':') + 1:]
-                    players = int(player[9:11])
-                    if players > 0:
-                        if user_id in get_admins():
-                            data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
-                                    'one_time_keyboard': True,
-                                    'resize_keyboard': True}
-                            send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>. Выключить?', data)
-                            ids[user_id]['waiting']['is_waiting'] = True
-                            ids[user_id]['waiting']['params'] = {'reason': 'close server'}
-                            with open(f'{path}names.json', 'w') as f:
-                                json.dump(ids, f, indent=2)
-                            return False
-                        else:
-                            send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
-                            return False
-                    else:
-                        status_code = close_server(user_id, timeout=5)
-                if status_code == 200:
-                    send_message(user_id, 'Сервер закроется через 5 секунд', keyboards(user_id))
-                elif status_code == 201:
-                    send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
+                if not check_port(1813):
+                    send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
                 else:
-                    send_message(user_id, f'Что-то не сработало, напиши в лс ({status_code})', keyboards(user_id))
+                    with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
+                        player = mcr.command("/list")
+                        list_players = player[player.index(':') + 1:]
+                        players = int(player[9:11])
+                        if players > 0:
+                            if user_id in get_admins():
+                                data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
+                                        'one_time_keyboard': True,
+                                        'resize_keyboard': True}
+                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>. Выключить?', data)
+                                ids[user_id]['waiting']['is_waiting'] = True
+                                ids[user_id]['waiting']['params'] = {'reason': 'close server'}
+                                with open(f'{path}names.json', 'w') as f:
+                                    json.dump(ids, f, indent=2)
+                                return False
+                            else:
+                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
+                                return False
+                        else:
+                            status_code = close_server(user_id, timeout=5)
+                    if status_code == 200:
+                        send_message(user_id, 'Сервер закроется через 5 секунд', keyboards(user_id))
+                    elif status_code == 201:
+                        send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
+                    else:
+                        send_message(user_id, f'Что-то не сработало, напиши в лс ({status_code})', keyboards(user_id))
 
         case '/logs' if ids[user_id]['is_admin']:
             with open(f'{path}log.txt', 'r', encoding='cp1251') as f:

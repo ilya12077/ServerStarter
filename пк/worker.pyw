@@ -38,8 +38,6 @@ def launch(issueid):
             break
         if realtime_output:
             print(realtime_output.strip(), flush=True)
-        if realtime_output == '':
-            break
 
 
 def close(timeout: int):

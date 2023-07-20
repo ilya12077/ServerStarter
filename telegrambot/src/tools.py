@@ -128,16 +128,13 @@ def check_port(port, host='192.168.1.10'):
 
 
 def launch_server(chat_id):
-    if check_port(1813):
-        status_code = requests.get(f'http://192.168.1.10:1813/server?issueid={chat_id}&action=launch').status_code
-        if status_code == 200:
-            return True
-        elif status_code == 201:
-            return 'busy'
-        else:
-            return status_code
+    status_code = requests.get(f'http://192.168.1.10:1813/server?issueid={chat_id}&action=launch').status_code
+    if status_code == 200:
+        return True
+    elif status_code == 201:
+        return 'busy'
     else:
-        return False
+        return status_code
 
 
 def close_server(user_id, timeout=0):
