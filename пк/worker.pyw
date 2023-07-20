@@ -34,7 +34,7 @@ def launch(issueid):
         if fnmatch.fnmatch(realtime_output, '*]: Done (*'):
             print(realtime_output.strip(), flush=True)
             is_busy = False
-            upload_video(issueid, r'C:\Users\mrily\OneDrive\PycharmProjects\Server-docker\пк\video_2022-08-21_19-16-23_2.mp4', 'И 5 секунд не прошло')
+            upload_video(issueid, r'video_2022-08-21_19-16-23_2.mp4', 'И 5 секунд не прошло')
             break
         if realtime_output:
             print(realtime_output.strip(), flush=True)
