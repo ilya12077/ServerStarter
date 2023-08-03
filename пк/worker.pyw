@@ -19,7 +19,7 @@ def upload_video(chat_id, file, caption=''):
     requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files)
 
 
-def launch(issueid):
+def launch(issueid, timeout: int = 60):
     global is_busy
     process = subprocess.Popen(
         r'cd C:\Users\mrily\Desktop\forgeserver && run.bat',
@@ -29,15 +29,18 @@ def launch(issueid):
         encoding='cp1251',
         errors='replace'
     )
-    while True:
+    start_time = time.time()
+    remaining_time = timeout
+    while remaining_time >= 0:
         realtime_output = process.stdout.readline()
         if fnmatch.fnmatch(realtime_output, '*]: Done (*'):
             print(realtime_output.strip(), flush=True)
-            is_busy = False
             upload_video(issueid, r'video_2022-08-21_19-16-23_2.mp4', 'И 5 секунд не прошло')
             break
         if realtime_output:
             print(realtime_output.strip(), flush=True)
+        remaining_time = int(timeout - (time.time() - start_time))
+    is_busy = False
 
 
 def close(timeout: int):
