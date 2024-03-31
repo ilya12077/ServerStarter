@@ -22,7 +22,7 @@ def upload_video(chat_id, file, caption=''):
 def launch(issueid, timeout: int = 60):
     global is_busy
     process = subprocess.Popen(
-        r'cd C:\Users\mrily\Desktop\forgeserver && run.bat',
+        r'cd C:\Users\mrily\Desktop\paper 1.20.4 && start.bat',
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         shell=True,
