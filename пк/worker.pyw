@@ -32,10 +32,11 @@ def launch(issueid, timeout: int = 60):
     start_time = time.time()
     remaining_time = timeout
     while remaining_time >= 0:
+        print(remaining_time)
         realtime_output = process.stdout.readline()
         if fnmatch.fnmatch(realtime_output, '*]: Done (*'):
             print(realtime_output.strip(), flush=True)
-            upload_video(issueid, r'video_2022-08-21_19-16-23_2.mp4', 'И 5 секунд не прошло')
+            upload_video(issueid, r'C:\Users\mrily\OneDrive\PycharmProjects\ServerStarter\пк\video_2022-08-21_19-16-23_2.mp4', 'И 5 секунд не прошло')
             break
         if realtime_output:
             print(realtime_output.strip(), flush=True)
@@ -50,6 +51,7 @@ def close(timeout: int):
     remaining_time = timeout
     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
         while remaining_time >= 0:
+            print(remaining_time)
             if remaining_time in timestamps:
                 timestamps.remove(remaining_time)
                 print(f"WARNING: Server closes in {remaining_time} seconds")
@@ -64,6 +66,7 @@ def close(timeout: int):
 @app.route('/server', methods=['GET'])
 def main():
     global is_busy
+    print(is_busy)
     if not is_busy:
         userid = request.args.get('issueid')
         action = request.args.get('action')
