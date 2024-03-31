@@ -267,9 +267,9 @@ def main_handler(r):
                 else:
                     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
                         player = mcr.command('list')
-                        list_players = player[player.index(':') + 1:]
                         players = int(player[player.index('are')+6:player.index('out of')-3])
                         if players > 0:
+                            list_players = player[player.index(':') + 1:]
                             if user_id in get_admins():
                                 data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
                                         'one_time_keyboard': True,
