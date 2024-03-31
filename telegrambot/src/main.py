@@ -230,6 +230,7 @@ def main_handler(r):
             if check_port(25565):
                 with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
                     player = mcr.command("list")
+                    list_players=''
                     try:
                         list_players = player[player.index(':') + 1:]
                         players = int(player[9:11])
