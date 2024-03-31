@@ -230,13 +230,13 @@ def main_handler(r):
             if check_port(25565):
                 with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
                     player = mcr.command("list")
-                    list_players=''
+                    list_players = ''
                     try:
                         list_players = player[player.index(':') + 1:]
-                        players = int(player[9:11])
+                        players = int(player[player.index('are') + 6:player.index('out of') - 3])
                     except ValueError:  # 'Unknown command. Type "/help" for help.'
-                        player = player
-                send_message(user_id, f'Сервер запущен. Игроков: {player}\n<i>{list_players}</i>', keyboards(user_id))
+                        pass
+                    send_message(user_id, f'Сервер запущен. Игроков: {player}\n<i>{list_players}</i>', keyboards(user_id))
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
             if not check_port(1813):
@@ -267,10 +267,10 @@ def main_handler(r):
                     send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
                 else:
                     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
-                        player = mcr.command("list")
+                        player = mcr.command('list')
                         try:
                             list_players = player[player.index(':') + 1:]
-                            players = int(player[9:11])
+                            players = int(player[player.index('are')+6:player.index('out of')-3])
                             if players > 0:
                                 if user_id in get_admins():
                                     data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
