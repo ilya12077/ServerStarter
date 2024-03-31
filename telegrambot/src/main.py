@@ -228,14 +228,15 @@ def main_handler(r):
         case '/info':
             if check_port(25565):
                 with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
-                    player = mcr.command("list")
+                    players = 0
                     list_players = ''
                     try:
+                        player = mcr.command("list")
                         list_players = player[player.index(':') + 1:]
-                        player = int(player[player.index('are') + 6:player.index('out of') - 3])
+                        players = int(player[player.index('are') + 6:player.index('out of') - 3])
                     except ValueError:  # 'Unknown command. Type "/help" for help.'
                         pass
-                    send_message(user_id, f'Сервер запущен. Игроков: {player}\n<i>{list_players}</i>', keyboards(user_id))
+                    send_message(user_id, f'Сервер запущен. Игроков: {players}\n<i>{list_players}</i>', keyboards(user_id))
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
             if not check_port(1813):
