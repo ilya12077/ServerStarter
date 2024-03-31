@@ -229,9 +229,12 @@ def main_handler(r):
         case '/info':
             if check_port(25565):
                 with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
-                    player = mcr.command("/list")
-                    list_players = player[player.index(':') + 1:]
-                    players = int(player[9:11])
+                    player = mcr.command("list")
+                    try:
+                        list_players = player[player.index(':') + 1:]
+                        players = int(player[9:11])
+                    except ValueError:  # 'Unknown command. Type "/help" for help.'
+                        player = 'unknown'
                 send_message(user_id, f'Сервер запущен. Игроков: {players}\n<i>{list_players}</i>', keyboards(user_id))
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
@@ -263,24 +266,26 @@ def main_handler(r):
                     send_message(user_id, 'Скрипт на пк не запущен, напиши в лс', keyboards(user_id))
                 else:
                     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
-                        player = mcr.command("/list")
-                        list_players = player[player.index(':') + 1:]
-                        players = int(player[9:11])
-                        if players > 0:
-                            if user_id in get_admins():
-                                data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
-                                        'one_time_keyboard': True,
-                                        'resize_keyboard': True}
-                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
-                                ids[user_id]['waiting']['is_waiting'] = True
-                                ids[user_id]['waiting']['params'] = {'reason': 'close server'}
-                                with open(f'{path}names.json', 'w') as f:
-                                    json.dump(ids, f, indent=2)
-                                return False
+                        player = mcr.command("list")
+                        try:
+                            list_players = player[player.index(':') + 1:]
+                            players = int(player[9:11])
+                            if players > 0:
+                                if user_id in get_admins():
+                                    data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
+                                            'one_time_keyboard': True,
+                                            'resize_keyboard': True}
+                                    send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
+                                    ids[user_id]['waiting']['is_waiting'] = True
+                                    ids[user_id]['waiting']['params'] = {'reason': 'close server'}
+                                    with open(f'{path}names.json', 'w') as f:
+                                        json.dump(ids, f, indent=2)
+                                else:
+                                    send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
+
                             else:
-                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
-                                return False
-                        else:
+                                status_code = close_server(user_id, timeout=5)
+                        except ValueError:  # 'Unknown command. Type "/help" for help.'
                             status_code = close_server(user_id, timeout=5)
                     if status_code == 200:
                         send_message(user_id, 'Сервер закроется через 5 секунд', keyboards(user_id))
