@@ -234,8 +234,8 @@ def main_handler(r):
                         list_players = player[player.index(':') + 1:]
                         players = int(player[9:11])
                     except ValueError:  # 'Unknown command. Type "/help" for help.'
-                        player = 'unknown'
-                send_message(user_id, f'Сервер запущен. Игроков: {players}\n<i>{list_players}</i>', keyboards(user_id))
+                        player = player
+                send_message(user_id, f'Сервер запущен. Игроков: {player}\n<i>{list_players}</i>', keyboards(user_id))
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
             if not check_port(1813):
@@ -281,8 +281,7 @@ def main_handler(r):
                                     with open(f'{path}names.json', 'w') as f:
                                         json.dump(ids, f, indent=2)
                                 else:
-                                    send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
-
+                                    send_message(user_id, f'Сейчас на сервере {player} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
                             else:
                                 status_code = close_server(user_id, timeout=5)
                         except ValueError:  # 'Unknown command. Type "/help" for help.'
