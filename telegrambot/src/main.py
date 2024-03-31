@@ -122,7 +122,6 @@ def waiting_user_handler(r):
             del ids[user_id]['waiting']['params']
             with open(f'{path}names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
-
         case 'close server':
             if msg == 'да':
                 if not check_port(25565):
@@ -233,7 +232,7 @@ def main_handler(r):
                     list_players = ''
                     try:
                         list_players = player[player.index(':') + 1:]
-                        players = int(player[player.index('are') + 6:player.index('out of') - 3])
+                        player = int(player[player.index('are') + 6:player.index('out of') - 3])
                     except ValueError:  # 'Unknown command. Type "/help" for help.'
                         pass
                     send_message(user_id, f'Сервер запущен. Игроков: {player}\n<i>{list_players}</i>', keyboards(user_id))
@@ -268,31 +267,26 @@ def main_handler(r):
                 else:
                     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
                         player = mcr.command('list')
-                        try:
-                            list_players = player[player.index(':') + 1:]
-                            players = int(player[player.index('are')+6:player.index('out of')-3])
-                            if players > 0:
-                                if user_id in get_admins():
-                                    data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
-                                            'one_time_keyboard': True,
-                                            'resize_keyboard': True}
-                                    send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
-                                    ids[user_id]['waiting']['is_waiting'] = True
-                                    ids[user_id]['waiting']['params'] = {'reason': 'close server'}
-                                    with open(f'{path}names.json', 'w') as f:
-                                        json.dump(ids, f, indent=2)
-                                else:
-                                    send_message(user_id, f'Сейчас на сервере {player} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
+                        list_players = player[player.index(':') + 1:]
+                        players = int(player[player.index('are')+6:player.index('out of')-3])
+                        if players > 0:
+                            if user_id in get_admins():
+                                data = {'keyboard': [[{'text': 'да'}, {'text': 'НЕТ'}]],
+                                        'one_time_keyboard': True,
+                                        'resize_keyboard': True}
+                                send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
+                                ids[user_id]['waiting']['is_waiting'] = True
+                                ids[user_id]['waiting']['params'] = {'reason': 'close server'}
+                                with open(f'{path}names.json', 'w') as f:
+                                    json.dump(ids, f, indent=2)
                             else:
-                                status_code = close_server(user_id, timeout=5)
-                        except ValueError:  # 'Unknown command. Type "/help" for help.'
+                                send_message(user_id, f'Сейчас на сервере {player} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
+                        else:
                             status_code = close_server(user_id, timeout=5)
-                    if status_code == 200:
-                        send_message(user_id, 'Сервер закроется через 5 секунд', keyboards(user_id))
-                    elif status_code == 201:
-                        send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
-                    else:
-                        send_message(user_id, f'Что-то не сработало, напиши в лс ({status_code})', keyboards(user_id))
+                            if status_code == 200:
+                                send_message(user_id, 'Сервер закроется через 5 секунд', keyboards(user_id))
+                            elif status_code == 201:
+                                send_message(user_id, 'Серв уже закрывается', keyboards(user_id))
 
         case '/logs' if ids[user_id]['is_admin']:
             with open(f'{path}log.txt', 'r', encoding='cp1251') as f:
