@@ -17,7 +17,7 @@ if os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False):
     path = '/etc/telegrambot/'
 else:
     path = ''
-with open(f'{path}names.json', 'r') as fl:
+with open(f'{path}data/names.json', 'r') as fl:
     ids = json.load(fl)
 
 
@@ -51,7 +51,7 @@ def pre_routine(r):
     if ids[user_id]['first_name'] != first_name:
         append_log(first_name, f'изменено имя пользователя {user_id} с {ids[user_id]["first_name"]} на {first_name}')
         ids[user_id]['first_name'] = first_name
-        with open(f'{path}names.json', 'w') as f:
+        with open(f'{path}data/names.json', 'w') as f:
             json.dump(ids, f, indent=2)
     if user_id != '647372660':
         append_log(first_name, msg)
@@ -70,7 +70,7 @@ def waiting_user_handler(r):
     if msg == 'Отмена':
         ids[user_id]['waiting']['is_waiting'] = False
         del ids[user_id]['waiting']['params']
-        with open(f'{path}names.json', 'w') as f:
+        with open(f'{path}data/names.json', 'w') as f:
             json.dump(ids, f, indent=2)
         send_message(user_id, 'Действие отменено', keyboards(user_id))
         return None  # иначе дальше будет поиск по несущ. ключу и будет ошибка
@@ -81,7 +81,7 @@ def waiting_user_handler(r):
                     if ids[_id]['first_name'] == msg:
                         ids[user_id]['waiting']['params']['to_person'] = int(_id)
                         ids[user_id]['waiting']['params']['reason'] = 'what to send in message'
-                        with open(f'{path}names.json', 'w') as f:
+                        with open(f'{path}data/names.json', 'w') as f:
                             json.dump(ids, f, indent=2)
                         break
 
@@ -93,7 +93,7 @@ def waiting_user_handler(r):
                 send_message(user_id, 'Не знаю такого', keyboards(user_id))
                 ids[user_id]['waiting']['is_waiting'] = False
                 del ids[user_id]['waiting']['params']
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
                 send_message(user_id, 'Отправил', keyboards(user_id))
 
@@ -102,7 +102,7 @@ def waiting_user_handler(r):
             send_message(ids[user_id]['waiting']['params']['to_person'], msg, keyboards(user_id), spoiler=True)
             ids[user_id]['waiting']['is_waiting'] = False
             del ids[user_id]['waiting']['params']
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
             send_message(user_id, 'Отправил', keyboards(user_id))
 
@@ -120,7 +120,7 @@ def waiting_user_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = False
             del ids[user_id]['waiting']['params']
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
         case 'close server':
             if msg == 'да':
@@ -141,7 +141,7 @@ def waiting_user_handler(r):
                 send_message(user_id, f'Не выключаю', keyboards(user_id))
             ids[user_id]['waiting']['is_waiting'] = False
             del ids[user_id]['waiting']['params']
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'rcon command':
@@ -154,7 +154,7 @@ def waiting_user_handler(r):
                     send_message(user_id, f'<pre>{html.escape(result)}</pre>', keyboards(user_id))
                     ids[user_id]['waiting']['is_waiting'] = False
                     del ids[user_id]['waiting']['params']
-                    with open(f'{path}names.json', 'w') as f:
+                    with open(f'{path}data/names.json', 'w') as f:
                         json.dump(ids, f, indent=2)
             except ConnectionRefusedError:
                 send_message(user_id, 'Сервер не запущен', keyboards(user_id))
@@ -168,7 +168,7 @@ def change_user(user_id, user, action):
                 return 'Он уже добавлен'
             else:
                 ids[user] = {'first_name': '#N/A', 'waiting': {'is_waiting': False}, 'is_admin': False}
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
                 append_log(ids[user_id]["first_name"], f'добавлен пользователь {user}')
                 send_message(user, 'Вам был открыт доступ к боту. Начните: /start')
@@ -182,18 +182,18 @@ def change_user(user_id, user, action):
                 append_log(ids[user_id]["first_name"], f'удален пользователь {ids[user]["first_name"]}({user})')
                 send_message(user, 'Вам был закрыт доступ к боту')
                 del ids[user]
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
                 return 'Удалил'
-
         case 'grant admin':
             if user not in ids:
+                print(ids)
                 return 'Пользователя нет в базе'
             if ids[user]['is_admin']:
                 return 'Он и так админ'
             else:
                 ids[user]['is_admin'] = True
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
                 append_log(ids[user_id]["first_name"], f'пользователь {ids[user]["first_name"]}({user}) установлен админом')
                 send_message(user, 'Поздравляю! Вы теперь админ', keyboards(user))
@@ -205,7 +205,7 @@ def change_user(user_id, user, action):
                 return 'Он и так не админ'
             else:
                 ids[user]['is_admin'] = False
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
                 append_log(ids[user_id]["first_name"], f'пользователь {ids[user]["first_name"]}({user}) удален из админов')
                 send_message(user, 'У Вас забрали админку :(', keyboards(user_id))
@@ -268,7 +268,7 @@ def main_handler(r):
                 else:
                     with MCRcon(host="192.168.1.10", password="Homa1207", port=25575) as mcr:
                         player = mcr.command('list')
-                        players = int(player[player.index('are')+6:player.index('out of')-3])
+                        players = int(player[player.index('are') + 6:player.index('out of') - 3])
                         if players > 0:
                             list_players = player[player.index(':') + 1:]
                             if user_id in get_admins():
@@ -278,7 +278,7 @@ def main_handler(r):
                                 send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>\nВыключить?', data)
                                 ids[user_id]['waiting']['is_waiting'] = True
                                 ids[user_id]['waiting']['params'] = {'reason': 'close server'}
-                                with open(f'{path}names.json', 'w') as f:
+                                with open(f'{path}data/names.json', 'w') as f:
                                     json.dump(ids, f, indent=2)
                             else:
                                 send_message(user_id, f'Сейчас на сервере {players} игроков: <i>{list_players}</i>, не могу выключить. Попросите администратора выключить сервер', keyboards(user_id))
@@ -325,7 +325,7 @@ def main_handler(r):
 
                 ids[user_id]['waiting']['is_waiting'] = True
                 ids[user_id]['waiting']['params'] = {'reason': 'rcon command'}
-                with open(f'{path}names.json', 'w') as f:
+                with open(f'{path}data/names.json', 'w') as f:
                     json.dump(ids, f, indent=2)
             else:
                 send_message(user_id, 'Сервер выключен', keyboards(user_id))
@@ -347,7 +347,7 @@ def main_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = True
             ids[user_id]['waiting']['params'] = {'reason': 'allow user'}
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'Удалить пользователя' if ids[user_id]['is_admin']:
@@ -359,7 +359,7 @@ def main_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = True
             ids[user_id]['waiting']['params'] = {'reason': 'disallow user'}
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'Добавить админку' if ids[user_id]['is_admin']:
@@ -371,7 +371,7 @@ def main_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = True
             ids[user_id]['waiting']['params'] = {'reason': 'grant admin'}
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'Убрать админку' if ids[user_id]['is_admin']:
@@ -383,7 +383,7 @@ def main_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = True
             ids[user_id]['waiting']['params'] = {'reason': 'revoke admin'}
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'Отправить сообщение':
@@ -396,7 +396,7 @@ def main_handler(r):
 
             ids[user_id]['waiting']['is_waiting'] = True
             ids[user_id]['waiting']['params'] = {'reason': 'send message to'}
-            with open(f'{path}names.json', 'w') as f:
+            with open(f'{path}data/names.json', 'w') as f:
                 json.dump(ids, f, indent=2)
 
         case 'Главное меню':
@@ -410,8 +410,7 @@ if __name__ == '__main__':
     if os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False):
         serve(app, host='0.0.0.0', port=8881, url_scheme='http')
     else:
-        app.run(host='192.168.1.10', port=8881)
-        # app.run(host='192.168.1.21', port=8881)
+        app.run(host='192.168.1.10', port=1818)
 
 # https://api.telegram.org/bot5570097300:AAHATJopuiSHBk8oN_uG3ty_95m2D5Q3Nzw/getWebhookInfo
 # https://api.telegram.org/bot5570097300:AAHATJopuiSHBk8oN_uG3ty_95m2D5Q3Nzw/setWebhook?url=telegram.bestserverever.com&drop_pending_updates=true

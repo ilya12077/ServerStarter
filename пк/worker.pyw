@@ -16,7 +16,7 @@ def upload_video(chat_id, file, caption=''):
     files = {
         'video': open(file, 'rb')
     }
-    requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files)
+    requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files, timeout=5)
 
 
 def launch(issueid, timeout: int = 60):

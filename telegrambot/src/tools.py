@@ -1,8 +1,9 @@
 import datetime
-import html
 import json
+import logging
 import os
 import socket
+import time
 
 import requests
 
@@ -11,12 +12,19 @@ if os.environ.get('AM_I_IN_A_DOCKER_CONTAINER', False):
     path = '/etc/telegrambot/'
 else:
     path = ''
-with open(f'{path}names.json', 'r') as fl:
+for filename in ['names.json']:
+    if not os.path.isfile(f'{path}data/{filename}'):
+        # Создаем файл, если он не существует
+        with open(f'{path}data/{filename}', 'w', encoding='utf-8') as fl:
+            fl.write('{}')
+with open(f'{path}data/names.json', 'r') as fl:
     ids = json.load(fl)
 
 
 def keyboards(user):
     global ids
+    with open(f'{path}data/names.json', 'r') as f:  # хз почему, но надо заново загружать, иначе ids неверный
+        ids = json.load(f)
     if ids[user]['is_admin']:
         return {'keyboard': [[{'text': '/info'}, {'text': 'Админ панель'}],
                              [{'text': 'Отправить сообщение'}],
@@ -45,36 +53,76 @@ def send_message(chat_id: int | str, message, keyboard=None, spoiler=False):
             'parse_mode': 'HTML',
             'reply_markup': keyboard
         }
-    r = requests.post(url + 'sendMessage', json=send_body)
-    if r.status_code == 400:
-        send_message(chat_id, html.escape(message), keyboard, spoiler)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            r = requests.post(url + 'sendMessage', json=send_body, timeout=2)
+            logging.info(f"Сообщение успешно отправлено. Запрос: URL={url + 'sendMessage'}, Body={json.dumps(send_body)}")
+            break  # Выход из цикла после успешного запроса
+        except requests.exceptions.ConnectTimeout:
+            attempt += 1
+            logging.warning(f'попытка {attempt}')
+            time.sleep(0.1)
+            if attempt == max_attempts:
+                logging.error("Превышено количество попыток отправки сообщения")
 
 
 def upload_photo(chat_id, file):
     files = {
         'photo': open(file, 'rb')
     }
-
-    requests.post(f'{url}sendPhoto?chat_id={chat_id}', files=files)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            requests.post(f'{url}sendPhoto?chat_id={chat_id}', files=files, timeout=2)
+            logging.info(f"Сообщение успешно отправлено. Запрос: URL={url}sendPhoto?chat_id={chat_id}")
+            break  # Выход из цикла после успешного запроса
+        except requests.exceptions.ConnectTimeout:
+            attempt += 1
+            logging.warning(f'попытка {attempt}')
+            time.sleep(0.1)
+            if attempt == max_attempts:
+                logging.error("Превышено количество попыток отправки сообщения")
 
 
 def upload_file(chat_id, file):
     files = {
-        'document': open(file, 'rb')
+        'document': open(f'{path}{file}', 'rb')
     }
-    requests.post(f'{url}sendDocument?chat_id={chat_id}', files=files)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            requests.post(f'{url}sendDocument?chat_id={chat_id}', files=files, timeout=2)
+            logging.info(f"Сообщение успешно отправлено. Запрос: URL={url}sendDocument?chat_id={chat_id}")
+            break  # Выход из цикла после успешного запроса
+        except requests.exceptions.ConnectTimeout:
+            attempt += 1
+            logging.warning(f'попытка {attempt}')
+            time.sleep(0.1)
+            if attempt == max_attempts:
+                logging.error("Превышено количество попыток отправки сообщения")
 
 
 def upload_video(chat_id, file, caption=''):
     files = {
         'video': open(file, 'rb')
     }
-    requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files)
-
-
-def write_json(data):
-    with open(f'{path}answer.json', 'w') as f:
-        json.dump(data, f, indent=2)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files, timeout=2)
+            logging.info(f"Сообщение успешно отправлено. Запрос: URL={url}sendVideo?chat_id={chat_id}&caption={caption}")
+            break  # Выход из цикла после успешного запроса
+        except requests.exceptions.ConnectTimeout:
+            attempt += 1
+            logging.warning(f'попытка {attempt}')
+            time.sleep(0.1)
+            if attempt == max_attempts:
+                logging.error("Превышено количество попыток отправки сообщения")
 
 
 def get_size(start_path='.'):
@@ -111,7 +159,7 @@ def is_easteregg(r):
 
 
 def get_admins() -> list:
-    with open(f'{path}names.json', 'r') as f:
+    with open(f'{path}data/names.json', 'r') as f:
         _ids = json.load(f)
         result = []
         for userid in _ids:
