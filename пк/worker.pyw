@@ -1,6 +1,7 @@
 import fnmatch
 import subprocess
 import time
+from datetime import datetime
 from threading import Thread
 
 import requests
@@ -16,11 +17,30 @@ def upload_video(chat_id, file, caption=''):
     files = {
         'video': open(file, 'rb')
     }
-    requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files, timeout=5)
+    max_attempts = 5
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            requests.post(f'{url}sendVideo?chat_id={chat_id}&caption={caption}', files=files, timeout=2)
+            # logging.info(f"Сообщение успешно отправлено. Запрос: URL={url}sendVideo?chat_id={chat_id}&caption={caption}")
+            break  # Выход из цикла после успешного запроса
+        except requests.exceptions.ConnectTimeout:
+            attempt += 1
+            # logging.warning(f'попытка {attempt}')
+            time.sleep(0.1)
+            # if attempt == max_attempts:
+            # logging.error("Превышено количество попыток отправки сообщения")
+
+
+def debug_log_busy(*args) -> None:
+    global is_busy
+    with open('C:\\Users\\mrily\\OneDrive\\PycharmProjects\\ServerStarter\\пк\\log.txt', 'a') as f:
+        f.write(f'[{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]: {is_busy} {args}\n')
 
 
 def launch(issueid, timeout: int = 60):
     global is_busy
+    debug_log_busy(issueid, 'launch')
     process = subprocess.Popen(
         r'cd C:\Users\mrily\OneDrive\paper 1.20.4 && start.bat',
         stdout=subprocess.PIPE,
@@ -42,10 +62,12 @@ def launch(issueid, timeout: int = 60):
             print(realtime_output.strip(), flush=True)
         remaining_time = int(timeout - (time.time() - start_time))
     is_busy = False
+    debug_log_busy(issueid, 'end launch')
 
 
 def close(timeout: int):
     global is_busy
+    debug_log_busy('close')
     timestamps = [60, 30, 10, 5, 4, 3, 2, 1]
     start_time = time.time()
     remaining_time = timeout
@@ -57,16 +79,17 @@ def close(timeout: int):
                 print(f"WARNING: Server closes in {remaining_time} seconds")
                 mcr.command(f"say WARNING: Server closes in {remaining_time} seconds")
             remaining_time = int(timeout - (time.time() - start_time))
-            time.sleep(0.1)
+            time.sleep(0.5)
         print('stop')
         mcr.command('stop')
         is_busy = False
+    debug_log_busy('end close')
 
 
 @app.route('/server', methods=['GET'])
 def main():
     global is_busy
-    print(is_busy)
+    debug_log_busy('main()')
     if not is_busy:
         userid = request.args.get('issueid')
         action = request.args.get('action')
@@ -92,5 +115,6 @@ def main():
 
 if __name__ == '__main__':
     is_busy = False
+    debug_log_busy('start serving app')
     serve(app, host='192.168.1.10', port=1813, url_scheme='http')
     # app.run(host='192.168.1.10', port=1813)
